@@ -16,6 +16,7 @@ To install:	```pip install invest```
 - [Getting (only) specific information about tickers](#getting--only--specific-information-about-tickers)
   * [Example: Historical data](#example--historical-data)
   * [Example: Specific `'info'` fields](#example--specific---info---fields)
+- [BulkHistory](#bulkhistory)
 - [Notes](#notes-1)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
