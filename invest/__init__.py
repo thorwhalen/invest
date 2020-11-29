@@ -1,6 +1,6 @@
 from inspect import signature, Parameter
 from importlib_resources import files
-from functools import lru_cache
+from functools import lru_cache, cached_property
 from typing import Iterable, Optional, Callable, Union
 import os
 
@@ -9,6 +9,7 @@ from py2store import KvReader, add_ipython_key_completions
 
 data_files_posix_path = files('invest').joinpath('data')
 DFLT_TICKER_SYMBOLS_FILENAME = 'default_ticker_symbols.csv'
+faang_tickers = list(('FB', 'AMZN', 'AAPL', 'NFLX', 'GOOG'))
 
 _empty_parameter_value = Parameter.empty
 
@@ -58,8 +59,41 @@ class Tickers(KvReader):
     A dict-like source of ticker symbols.
     Keys are ticker symbol strings and values are Ticker object (which offers a dict-like interface to more information)
 
+    >>> from invest import Tickers
+    >>> tickers = Tickers()  # Get a default list of tickers
 
-    The first argument of Tickers is the ``ticker_symbols`` argument.
+    ``tickers`` is a dict-like container of tickers. So you can do dict-like things with it, like...
+
+    >>> len(tickers)  # ask for it's length
+    4039
+    >>> sorted(tickers)[:5]  # list the keys (well, the five first ones)  (using sorted instead of list for consistency)
+    ['AAAP', 'AACC', 'AACOU', 'AAIT', 'AAL']
+    >>> 'GOOG' in tickers  # check for containment of a key
+    True
+
+    The values of this dict-like object are `Ticker` instances.
+
+    >>> ticker = tickers['GOOG']
+    >>> ticker
+    Ticker('GOOG')
+
+    This `ticker` object is also dict-like. Let's see how many keys there are:
+
+    >>> len(ticker)  # how many keys are there?
+    40
+    >>> sorted(ticker)  # What are these keys?   #doctest: +NORMALIZE_WHITESPACE
+    ['actions', 'balance_sheet', 'balancesheet', 'calendar', 'cashflow', 'dividends', 'earnings', 'financials',
+    'get_actions', 'get_balance_sheet', 'get_balancesheet', 'get_calendar', 'get_cashflow', 'get_dividends',
+    'get_earnings', 'get_financials', 'get_info', 'get_institutional_holders', 'get_isin', 'get_major_holders',
+    'get_mutualfund_holders', 'get_recommendations', 'get_splits', 'get_sustainability', 'history', 'info',
+    'institutional_holders', 'isin', 'major_holders', 'mutualfund_holders', 'option_chain', 'options',
+    'quarterly_balance_sheet', 'quarterly_balancesheet', 'quarterly_cashflow', 'quarterly_earnings',
+    'quarterly_financials', 'recommendations', 'splits', 'sustainability']
+
+
+
+
+    The first argument of ```Tickers(...)`` is the ``ticker_symbols`` argument.
 
     One can specify a collection (``list``, ``set``, ``tuple``, etc.) of ticker symbol strings,
     or a path to a file containing a pickle of such a collection.
@@ -160,6 +194,11 @@ class Ticker(KvReader):
             The arguments of these methods all have defaults, but if you want to use different defaults,
             you can specify that here.
 
+        Example:
+
+        >>> ticker = Ticker('GOOG', history=dict(period='1d', interval='15m'))
+
+
         """
         self.ticker_symbol = ticker_symbol
         self.ticker = yf.Ticker(ticker_symbol)
@@ -218,6 +257,12 @@ class TickersWithSpecificInfo(Tickers):
             The arguments of these methods all have defaults, but if you want to use different defaults,
             you can specify that here.
 
+        Example (2008 historical data, month granularity):
+
+        >>> tickers = TickersWithSpecificInfo(specific_key='history',
+        ...     start='2008-01-01', end='2009-01-01', interval='1mo')
+
+
         """
         assert specific_key in _ticker_attrs_that_are_properties or specific_key in _ticker_attrs_that_are_methods, \
             f"Unrecognized specific_key. Needs to be one of these: " \
@@ -247,3 +292,17 @@ class TickersWithSpecificInfo(Tickers):
                    f"(ticker_symbols={self.ticker_symbols}{suffix})"
 
     help_me_with = staticmethod(help_me_with)
+
+
+class BulkHistory(Tickers):
+    def __init__(self, ticker_symbols: Union[str, Iterable] = faang_tickers, **history_kwargs):
+        super().__init__(ticker_symbols=ticker_symbols, history=history_kwargs)
+        self.yf_tickers = yf.Tickers(ticker_symbols)
+        self.history_kwargs = history_kwargs
+
+    @cached_property
+    def data(self):
+        return self.yf_tickers.history(**self.history_kwargs).stack(level=0).unstack()
+
+    def __getitem__(self, k):
+        return self.data[k]

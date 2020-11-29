@@ -204,19 +204,6 @@ df
 
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -646,19 +633,6 @@ df
 
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -1054,19 +1028,6 @@ info_df
 
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
@@ -1118,10 +1079,58 @@ info_df
 </div>
 
 
+# BulkHistory
+
+
+```python
+from invest import BulkHistory
+
+tickers = BulkHistory(start='2019-01-01', end='2020-01-01', interval='1mo')  # 2019 historical data, month granularity
+tickers
+```
+
+
+
+
+    BulkHistory(ticker_symbols=['FB', 'AMZN', 'AAPL', 'NFLX', 'GOOG'], history={'start': '2019-01-01', 'end': '2020-01-01', 'interval': '1mo'})
+
+
+
+
+```python
+candlestick_plot(tickers['FB'])
+```
+
+    [*********************100%***********************]  5 of 5 completed
+
+
+
+    
+![png](img/output_72_1.png)
+    
+
+
+Notice that the data doesn't download again when we ask for `GOOG` data. That's because the first download bulk downloaded the data for our whole list of ticker symbols.
+
+
+```python
+candlestick_plot(tickers['GOOG'])
+```
+
+
+    
+![png](img/output_74_0.png)
+    
+
+
 
 # Notes
 
-- Though `Tickers` allows you to deal with a collection of tickers, it does so (for time being) by calling yahoo's API for each individual ticker. The API does, on the other hand, contain some bulk tickers routes which we intend to integrate.
+- - Though `Tickers` allows you to deal with a collection of tickers, it does so (for time being) by calling 
+yahoo's API for each individual ticker. 
+The API does, on the other hand, contain some bulk tickers routes which we intend to integrate. 
+For historical data (`history`), we have `BulkHistory` that uses the bulk API (through `yfinance.Tickers`), 
+but for other information (such at the `info` key), we don't (yet).
 
 
 
