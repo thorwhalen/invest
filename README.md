@@ -17,9 +17,8 @@ To install:	```pip install invest```
   * [Example: Historical data](#example--historical-data)
   * [Example: Specific `'info'` fields](#example--specific---info---fields)
 - [BulkHistory](#bulkhistory)
-- [Notes](#notes-1)
-
-<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+  * [Notes](#notes-1)
+- [All information](#all-information)
 
 
 # Quick Start
