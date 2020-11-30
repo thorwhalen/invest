@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
+# Copied and edited from https://github.com/ranaroussi/yfinance, which had problems and doesn't seem maintained anymore
+#
+# Original docs:
 # Yahoo! Finance market data downloader (+fix for Pandas Datareader)
 # https://github.com/ranaroussi/yfinance
 #
