@@ -1,4 +1,4 @@
-from inspect import signature, Parameter
+from inspect import signature
 from importlib_resources import files
 from functools import lru_cache, cached_property
 from typing import Iterable, Optional, Callable, Union
@@ -7,12 +7,11 @@ import os
 from py2store import KvReader, add_ipython_key_completions
 
 import invest.yfinance as yf
+from invest._prep import _ticker_attrs_that_are_properties, _ticker_attrs_that_are_methods
 
 data_files_posix_path = files('invest').joinpath('data')
 DFLT_TICKER_SYMBOLS_FILENAME = 'default_ticker_symbols.csv'
 faang_tickers = list(('FB', 'AMZN', 'AAPL', 'NFLX', 'GOOG'))
-
-_empty_parameter_value = Parameter.empty
 
 
 def help_me_with(item: str):
@@ -22,34 +21,6 @@ def help_me_with(item: str):
 
 def _nice_kv_string(mapping):
     return ', '.join((f"{k}={v}" for k, v in mapping.items()))
-
-
-def _method_has_defaults_for_all_arguments(func):
-    parameters = signature(func).parameters
-    if len(parameters) == 1:  # if only one param, it's the instance, so no arguments required, so...
-        return True
-    else:
-        instance, first_real_param, *remaining_args = parameters.values()
-        if first_real_param.default is not _empty_parameter_value:
-            # if the first (real) param has a default, all other params must to (or be variable like *args or **kwargs)
-            return True
-        else:
-            return False
-
-
-_ticker_attrs_that_are_properties = {a for a in dir(yf.Ticker)
-                                     if not a.startswith('_')
-                                     and not callable(getattr(yf.Ticker, a))}
-
-_ticker_attrs_that_are_callable = {a for a in dir(yf.Ticker)
-                                   if not a.startswith('_')
-                                   and callable(getattr(yf.Ticker, a))
-                                   and _method_has_defaults_for_all_arguments}
-# remove those callable attrs that start with get_ (see in utils.py:)
-
-_getless_callable_attrs = {x[4:] for x in _ticker_attrs_that_are_callable if x.startswith('get_')}
-_ticker_attrs_that_are_methods = (_getless_callable_attrs
-                                  | {x for x in _ticker_attrs_that_are_callable if not x.startswith('get_')})
 
 
 @lru_cache(maxsize=1)
@@ -86,12 +57,13 @@ class Tickers(KvReader):
     This `ticker` object is also dict-like. Let's see how many keys there are:
 
     >>> len(ticker)  # how many keys are there?
-    24
+    22
     >>> sorted(ticker)  # What are these keys?   #doctest: +NORMALIZE_WHITESPACE
-    ['actions', 'balance_sheet', 'balancesheet', 'calendar', 'cashflow', 'dividends', 'earnings', 'financials',
-    'history', 'info', 'institutional_holders', 'isin', 'major_holders', 'mutualfund_holders', 'option_chain',
-    'options', 'quarterly_balance_sheet', 'quarterly_balancesheet', 'quarterly_cashflow', 'quarterly_earnings',
-    'quarterly_financials', 'recommendations', 'splits', 'sustainability']
+    ['actions', 'balance_sheet', 'calendar', 'cashflow', 'dividends', 'earnings', 'financials', 'history', 'info',
+    'institutional_holders', 'isin', 'major_holders', 'mutualfund_holders', 'option_chain', 'options',
+    'quarterly_balance_sheet', 'quarterly_cashflow', 'quarterly_earnings', 'quarterly_financials',
+    'recommendations', 'splits', 'sustainability']
+
 
 
     The first argument of ```Tickers(...)`` is the ``ticker_symbols`` argument.
