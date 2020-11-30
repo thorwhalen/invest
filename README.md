@@ -463,7 +463,7 @@ candlestick_plot(df)
 
 
     
-![png](https://github.com/thorwhalen/invest/tree/master/img/output_23_0.png)
+![png](https://raw.githubusercontent.com/thorwhalen/invest/master/img/output_23_0.png)
     
 
 
@@ -822,7 +822,7 @@ candlestick_plt(df)
 
 
     
-![png](https://github.com/thorwhalen/invest/tree/master/img/output_45_0.png)
+![png](https://raw.githubusercontent.com/thorwhalen/invest/master/img/output_45_0.png)
     
 
 
@@ -867,7 +867,7 @@ candlestick_plot(tickers['NFLX']['history'])
 
 
     
-![png](https://github.com/thorwhalen/invest/tree/master/img/output_51_0.png)
+![png](https://raw.githubusercontent.com/thorwhalen/invest/master/img/output_51_0.png)
     
 
 
@@ -878,7 +878,7 @@ candlestick_plot(tickers['AMZN']['history'])
 
 
     
-![png](https://github.com/thorwhalen/invest/tree/master/img/output_52_0.png)
+![png](https://raw.githubusercontent.com/thorwhalen/invest/master/img/output_52_0.png)
     
 
 
@@ -893,7 +893,7 @@ candlestick_plot(tickers['DAL']['history'])
 
 
     
-![png](https://github.com/thorwhalen/invest/tree/master/img/output_54_0.png)
+![png](https://raw.githubusercontent.com/thorwhalen/invest/master/img/output_54_0.png)
     
 
 
@@ -931,7 +931,7 @@ candlestick_plot(tickers['GOOG'])
 
 
     
-![png](https://github.com/thorwhalen/invest/tree/master/img/output_60_0.png)
+![png](https://raw.githubusercontent.com/thorwhalen/invest/master/img/output_60_0.png)
     
 
 
@@ -942,7 +942,7 @@ candlestick_plot(tickers['NFLX'])
 
 
     
-![png](https://github.com/thorwhalen/invest/tree/master/img/output_61_0.png)
+![png](https://raw.githubusercontent.com/thorwhalen/invest/master/img/output_61_0.png)
     
 
 
@@ -953,7 +953,7 @@ candlestick_plot(tickers['AMZN'])
 
 
     
-![png](https://github.com/thorwhalen/invest/tree/master/img/output_62_0.png)
+![png](https://raw.githubusercontent.com/thorwhalen/invest/master/img/output_62_0.png)
     
 
 
@@ -964,7 +964,7 @@ candlestick_plot(tickers['AAPL'])
 
 
     
-![png](https://github.com/thorwhalen/invest/tree/master/img/output_63_0.png)
+![png](https://raw.githubusercontent.com/thorwhalen/invest/master/img/output_63_0.png)
     
 
 
@@ -1106,7 +1106,7 @@ candlestick_plot(tickers['FB'])
 
 
     
-![png](https://github.com/thorwhalen/invest/tree/master/img/output_72_1.png)
+![png](https://raw.githubusercontent.com/thorwhalen/invest/master/img/output_72_1.png)
     
 
 
@@ -1119,7 +1119,7 @@ candlestick_plot(tickers['GOOG'])
 
 
     
-![png](https://github.com/thorwhalen/invest/tree/master/img/output_74_0.png)
+![png](https://raw.githubusercontent.com/thorwhalen/invest/master/img/output_74_0.png)
     
 
 
