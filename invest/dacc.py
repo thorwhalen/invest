@@ -8,33 +8,15 @@ from py2store.trans import add_ipython_key_completions, kv_wrap
 from py2store.key_mappers.paths import str_template_key_trans
 
 from invest import Ticker
+from invest.util import handle_missing_dir
 
 ROOTDIR_ENVVAR = 'INVEST_ROOTDIR'
 DFLT_ROOTDIR = os.environ.get(ROOTDIR_ENVVAR, os.path.expanduser('~/.invest'))
 DFLT_TICKER_DATA_DIR = os.path.join(DFLT_ROOTDIR, 'ticker_data')
 
-
-def clog(condition, *args):
-    if condition:
-        print(*args)
-
-
-def handle_missing_dir(dirpath, prefix_msg='', ask_first=True, verbose=True):
-    if not os.path.isdir(dirpath):
-        if ask_first:
-            clog(verbose, prefix_msg)
-            clog(verbose, f"This directory doesn't exist: {dirpath}")
-            answer = input("Should I make that directory for you? ([Y]/n)?") or 'Y'
-            if next(iter(answer.strip().lower()), None) != 'y':
-                return
-        clog(verbose, f"Making {dirpath}...")
-        os.mkdir(dirpath)
-
-
 handle_missing_dir(DFLT_ROOTDIR)
 
 path_sep = os.path.sep
-
 
 remote_field_trans = str_template_key_trans('{ticker}' + path_sep + '{field}', str_template_key_trans.key_types.str)
 
@@ -42,7 +24,6 @@ remote_field_trans = str_template_key_trans('{ticker}' + path_sep + '{field}', s
 @kv_wrap(remote_field_trans)
 class _RemoteYfDataReader:
     def __getitem__(self, k):
-        # print(f"------ {k}")
         ticker_symbol, field = k.split(path_sep)
         return Ticker(ticker_symbol)[field]
 

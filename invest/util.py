@@ -1,3 +1,4 @@
+import os
 from typing import Iterable
 from datetime import datetime
 
@@ -67,3 +68,20 @@ def _assert_that_attrs_extraction_is_correct():
             assert all(comparison), assertion_error_msg
         else:
             assert comparison, assertion_error_msg
+
+
+def clog(condition, *args):
+    if condition:
+        print(*args)
+
+
+def handle_missing_dir(dirpath, prefix_msg='', ask_first=True, verbose=True):
+    if not os.path.isdir(dirpath):
+        if ask_first:
+            clog(verbose, prefix_msg)
+            clog(verbose, f"This directory doesn't exist: {dirpath}")
+            answer = input("Should I make that directory for you? ([Y]/n)?") or 'Y'
+            if next(iter(answer.strip().lower()), None) != 'y':
+                return
+        clog(verbose, f"Making {dirpath}...")
+        os.mkdir(dirpath)
