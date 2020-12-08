@@ -23,9 +23,9 @@ def _nice_kv_string(mapping):
     return ', '.join((f"{k}={v}" for k, v in mapping.items()))
 
 
-@lru_cache(maxsize=1)
-def get_local_ticker_list():
-    return {x for x in data_files_posix_path.joinpath(DFLT_TICKER_SYMBOLS_FILENAME).read_text().split('\n') if x}
+@lru_cache(maxsize=9)
+def get_local_ticker_set(filename=DFLT_TICKER_SYMBOLS_FILENAME):
+    return {x for x in data_files_posix_path.joinpath(filename).read_text().split('\n') if x}
 
 
 # TODO: Use https://github.com/shilewenuw/get_all_tickers (or another) to get ticker symbol lists
@@ -108,7 +108,7 @@ class Tickers(KvReader):
         if isinstance(ticker_symbols, str):
             if ticker_symbols == 'local_list':
                 self._ticker_source_kind = "local_list"
-                self.ticker_symbols = get_local_ticker_list()
+                self.ticker_symbols = get_local_ticker_set()
             elif os.path.isfile(ticker_symbols):
                 self._ticker_source_kind = "filepath of a pickled iterable"
                 import pickle
