@@ -1,0 +1,4 @@
+invest
+======
+.. automodule:: invest
+   :members:
