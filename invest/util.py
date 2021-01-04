@@ -3,6 +3,7 @@ from typing import Iterable
 from datetime import datetime
 
 DFLT_TICKER = "GOOG"
+DFLT_DATE_FORMAT = '%Y-%m-%d:%H:%M:%S'
 
 
 def hms_message(msg=''):
@@ -85,3 +86,45 @@ def handle_missing_dir(dirpath, prefix_msg='', ask_first=True, verbose=True):
                 return
         clog(verbose, f"Making {dirpath}...")
         os.mkdir(dirpath)
+
+
+import json
+from datetime import datetime
+
+
+class DateTimeEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, datetime):
+            return o.isoformat()
+
+        return json.JSONEncoder.default(self, o)
+
+
+def is_jsonizable(obj):
+    try:
+        json.loads(json.dumps(obj))
+        return True
+    except Exception:
+        return False
+
+
+from typing import Iterable
+
+
+def is_bsonizable(obj):
+    """
+
+    >>> is_bsonizable({"this": 'is normal'})  # also jsonizable
+    True
+    >>> is_bsonizable({"date": datetime.now()})  # NOT jsonizable
+    True
+    >>> is_bsonizable({datetime.now(): "datetime objects allowed as values, not keys"})  # also NOT jsonizable
+    False
+
+    """
+    from bson import json_util
+    try:
+        json_util.loads(json_util.dumps(obj))
+        return True
+    except Exception:
+        return False

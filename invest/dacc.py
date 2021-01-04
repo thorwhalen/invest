@@ -14,7 +14,13 @@ ROOTDIR_ENVVAR = 'INVEST_ROOTDIR'
 DFLT_ROOTDIR = os.environ.get(ROOTDIR_ENVVAR, os.path.expanduser('~/.invest'))
 DFLT_TICKER_DATA_DIR = os.path.join(DFLT_ROOTDIR, 'ticker_data')
 
-handle_missing_dir(DFLT_ROOTDIR)
+proj_root_dir = DFLT_ROOTDIR
+handle_missing_dir(proj_root_dir)
+
+
+def proj_file(*args):
+    return os.path.join(proj_root_dir, *args)
+
 
 path_sep = os.path.sep
 

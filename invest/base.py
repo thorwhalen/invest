@@ -10,6 +10,9 @@ import invest.yfinance as yf
 from invest._prep import _ticker_attrs_that_are_properties, _ticker_attrs_that_are_methods
 
 data_files_posix_path = files('invest').joinpath('data')
+data_dir = str(data_files_posix_path)
+data_join = data_files_posix_path.joinpath
+
 DFLT_TICKER_SYMBOLS_FILENAME = 'default_ticker_symbols.csv'
 faang_tickers = list(('FB', 'AMZN', 'AAPL', 'NFLX', 'GOOG'))
 
