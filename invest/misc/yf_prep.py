@@ -126,14 +126,14 @@ def mgc_to_prepped_data(mgc):
 from py2store.persisters.mongo_w_pymongo import MongoDbReader, MongoCollectionPersister
 from py2store.caching import mk_cached_store
 
-yf = MongoDbReader('yf', collection_store_cls=MongoCollectionPersister)
+yf = MongoDbReader('yf', mk_collection_store=MongoCollectionPersister)
 
 
 @mk_cached_store
 @wrap_kvs(obj_of_data=mgc_to_df)
 class DbDf(MongoDbReader):
     def __init__(self):
-        super().__init__('yf', collection_store_cls=MongoCollectionPersister)
+        super().__init__('yf', mk_collection_store=MongoCollectionPersister)
 
 
 def file_to_field_groups(file=proj_file('misc', 'field_groups_01.xlsx')):
