@@ -123,7 +123,7 @@ def mgc_to_prepped_data(mgc):
     return df
 
 
-from py2store.persisters.mongo_w_pymongo import MongoDbReader, MongoCollectionPersister
+from mongodol import MongoDbReader, MongoCollectionPersister
 from py2store.caching import mk_cached_store
 
 yf = MongoDbReader('yf', mk_collection_store=MongoCollectionPersister)
