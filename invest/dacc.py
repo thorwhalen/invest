@@ -24,7 +24,9 @@ def proj_file(*args):
 
 path_sep = os.path.sep
 
-remote_field_trans = str_template_key_trans('{ticker}' + path_sep + '{field}', str_template_key_trans.key_types.str)
+remote_field_trans = str_template_key_trans(
+    '{ticker}' + path_sep + '{field}', str_template_key_trans.key_types.str
+)
 
 
 @kv_wrap(remote_field_trans)
@@ -36,7 +38,9 @@ class _RemoteYfDataReader:
 
 remote_data = _RemoteYfDataReader()
 
-ticker_field_trans = str_template_key_trans('{ticker}' + path_sep + '{field}.p', str_template_key_trans.key_types.str)
+ticker_field_trans = str_template_key_trans(
+    '{ticker}' + path_sep + '{field}.p', str_template_key_trans.key_types.str
+)
 
 
 @add_ipython_key_completions
@@ -52,7 +56,7 @@ _YahooData = mk_sourced_store(
     source=remote_data,
     return_source_data=True,
     __name__='_YahooData',
-    __module__=__name__
+    __module__=__name__,
 )
 
 
