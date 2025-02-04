@@ -33,6 +33,8 @@ try:
 except ImportError:
     import json as _json
 
+from invest.util import requests_get
+
 
 def empty_df(index=[]):
     empty = _pd.DataFrame(
@@ -51,10 +53,10 @@ def empty_df(index=[]):
 
 
 def get_json(url, proxy=None):
-    html = _requests.get(url=url, proxies=proxy).text
+    html = requests_get(url=url, proxies=proxy).text
 
     if "QuoteSummaryStore" not in html:
-        html = _requests.get(url=url, proxies=proxy).text
+        html = requests_get(url=url, proxies=proxy).text
         if "QuoteSummaryStore" not in html:
             return {}
 

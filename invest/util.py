@@ -2,6 +2,7 @@
 util.py for invest package
 """
 
+import io
 import os
 from typing import Iterable
 from datetime import datetime
@@ -11,11 +12,21 @@ import requests as _requests
 DFLT_TICKER = "GOOG"
 DFLT_DATE_FORMAT = '%Y-%m-%d:%H:%M:%S'
 
-DFLT_REQUEST_HEADER = {'User-Agent': 'invest/1.0'}
+DFLT_REQUEST_HEADER = {'User-Agent': 'Mozilla/5.0'}
 
 
-def requests_get(*args, header=DFLT_REQUEST_HEADER, **kwargs):
-    return _requests.get(*args, headers=header, **kwargs)
+def requests_get(*args, headers=DFLT_REQUEST_HEADER, **kwargs):
+    response = _requests.get(*args, headers=headers, **kwargs)
+    if not response.ok:
+        response.raise_for_status()
+    return response
+
+
+def read_html(url, **kwargs):
+    import pandas as pd
+
+    reponse = requests_get(url, **kwargs)
+    return pd.read_html(io.StringIO(reponse.text))
 
 
 def hms_message(msg=''):

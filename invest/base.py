@@ -8,7 +8,7 @@ from functools import lru_cache, cached_property
 from typing import Iterable, Optional, Callable, Union
 import os
 
-from py2store import KvReader, add_ipython_key_completions
+from dol import KvReader, add_ipython_key_completions
 
 import invest.yfinance as yf
 from invest._prep import _ticker_attrs_that_are_properties, _ticker_attrs_that_are_methods

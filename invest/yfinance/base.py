@@ -26,7 +26,7 @@ import datetime as _datetime
 import pandas as _pd
 import numpy as _np
 
-from invest.util import requests_get
+from invest.util import requests_get, read_html
 
 try:
     from urllib.parse import quote as urlencode
@@ -293,7 +293,7 @@ class TickerBase:
         data = utils.get_json(ticker_url, proxy)
 
         # holders
-        holders = _pd.read_html(ticker_url + '/holders')
+        holders = read_html(ticker_url + '/' + 'holders')
 
         if len(holders) >= 3:
             self._major_holders = holders[0]
@@ -364,7 +364,8 @@ class TickerBase:
             if isinstance(data.get(item), dict):
                 self._info.update(data[item])
 
-        self._info['regularMarketPrice'] = self._info['regularMarketOpen']
+
+        self._info['regularMarketPrice'] = self._info.get('regularMarketOpen', None)
         self._info['logo_url'] = ""
         try:
             domain = (
