@@ -3,14 +3,14 @@ Base functionality for the invest package.
 """
 
 from inspect import signature
-from importlib_resources import files
+from importlib.resources import files
 from functools import lru_cache, cached_property
 from typing import Iterable, Optional, Callable, Union
 import os
 
 from dol import KvReader, add_ipython_key_completions
 
-import invest.yfinance as yf
+import yfinance as yf
 from invest._prep import _ticker_attrs_that_are_properties, _ticker_attrs_that_are_methods
 
 data_files_posix_path = files('invest').joinpath('data')

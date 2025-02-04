@@ -3,7 +3,7 @@ Data prep tools for invest.
 """
 from inspect import signature, Parameter
 
-import invest.yfinance as yf
+import yfinance as yf
 
 _empty_parameter_value = Parameter.empty
 
