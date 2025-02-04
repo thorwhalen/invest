@@ -11,7 +11,10 @@ import os
 from dol import KvReader, add_ipython_key_completions
 
 import yfinance as yf
-from invest._prep import _ticker_attrs_that_are_properties, _ticker_attrs_that_are_methods
+from invest._prep import (
+    _ticker_attrs_that_are_properties,
+    _ticker_attrs_that_are_methods,
+)
 
 data_files_posix_path = files('invest').joinpath('data')
 data_dir = str(data_files_posix_path)
@@ -23,7 +26,9 @@ faang_tickers = list(('FB', 'AMZN', 'AAPL', 'NFLX', 'GOOG'))
 
 def help_me_with(item: str):
     attr = getattr(yf.Ticker, item)
-    print(f"{attr.__name__}\nwraps {attr}, whose signature is:\n{signature(attr)}\n{attr.__doc__}\n")
+    print(
+        f"{attr.__name__}\nwraps {attr}, whose signature is:\n{signature(attr)}\n{attr.__doc__}\n"
+    )
 
 
 def _nice_kv_string(mapping):
@@ -32,7 +37,9 @@ def _nice_kv_string(mapping):
 
 @lru_cache(maxsize=9)
 def get_local_ticker_set(filename=DFLT_TICKER_SYMBOLS_FILENAME):
-    return {x for x in data_files_posix_path.joinpath(filename).read_text().split('\n') if x}
+    return {
+        x for x in data_files_posix_path.joinpath(filename).read_text().split('\n') if x
+    }
 
 
 # TODO: Use https://github.com/shilewenuw/get_all_tickers (or another) to get ticker symbol lists
@@ -96,9 +103,11 @@ class Tickers(KvReader):
     >>> assert tickers['NFLX']['info']['shortName'] == 'Netflix, Inc.'
     """
 
-    def __init__(self,
-                 ticker_symbols: Union[str, Iterable] = 'local_list',
-                 **kwargs_for_method_keys):
+    def __init__(
+        self,
+        ticker_symbols: Union[str, Iterable] = 'local_list',
+        **kwargs_for_method_keys,
+    ):
         """
         Make a dict-like container of tickers.
 
@@ -119,18 +128,27 @@ class Tickers(KvReader):
             elif os.path.isfile(ticker_symbols):
                 self._ticker_source_kind = "filepath of a pickled iterable"
                 import pickle
+
                 self.ticker_symbols = pickle.load(open(ticker_symbols))
             else:
-                raise ValueError(f"Unrecognized ticker_symbols string. "
-                                 f"Should be 'local_list' or the file path of a pickled list. "
-                                 f"Was {ticker_symbols}")
+                raise ValueError(
+                    f"Unrecognized ticker_symbols string. "
+                    f"Should be 'local_list' or the file path of a pickled list. "
+                    f"Was {ticker_symbols}"
+                )
         elif isinstance(ticker_symbols, Iterable):
             if len(ticker_symbols) > 7:
-                self._ticker_source_kind = f"explicit {type(ticker_symbols)} of {len(ticker_symbols)} tickers"
+                self._ticker_source_kind = (
+                    f"explicit {type(ticker_symbols)} of {len(ticker_symbols)} tickers"
+                )
             self.ticker_symbols = ticker_symbols
         else:
-            raise ValueError(f"Unrecognized ticker source. Should be an iterable of explicit or point to one somehow")
-        assert isinstance(self.ticker_symbols, Iterable), "self.ticker_symbols should be iterable at this point"
+            raise ValueError(
+                f"Unrecognized ticker source. Should be an iterable of explicit or point to one somehow"
+            )
+        assert isinstance(
+            self.ticker_symbols, Iterable
+        ), "self.ticker_symbols should be iterable at this point"
 
     def __iter__(self):
         yield from self.ticker_symbols
@@ -151,7 +169,9 @@ class Tickers(KvReader):
         if self._ticker_source_kind is not None:
             return f"{type(self).__name__}(ticker_symbols=<{self._ticker_source_kind}>{suffix})"
         else:
-            return f"{type(self).__name__}(ticker_symbols={self.ticker_symbols}{suffix})"
+            return (
+                f"{type(self).__name__}(ticker_symbols={self.ticker_symbols}{suffix})"
+            )
 
     help_me_with = staticmethod(help_me_with)
 
@@ -163,8 +183,7 @@ class Ticker(KvReader):
     _property_keys = _ticker_attrs_that_are_properties
     _method_keys = _ticker_attrs_that_are_methods
 
-    def __init__(self, ticker_symbol: str,
-                 **kwargs_for_method_keys):
+    def __init__(self, ticker_symbol: str, **kwargs_for_method_keys):
         """
         A dict-like interface to ticker information.
 
@@ -218,10 +237,13 @@ class Ticker(KvReader):
 
 # TODO: Generalize the [:][specific] pattern into a tool and use it.
 class TickersWithSpecificInfo(Tickers):
-    def __init__(self, ticker_symbols='local_list',
-                 specific_key: str = 'info',
-                 val_trans: Optional[Callable] = None,
-                 **kwargs_for_specific_method):
+    def __init__(
+        self,
+        ticker_symbols='local_list',
+        specific_key: str = 'info',
+        val_trans: Optional[Callable] = None,
+        **kwargs_for_specific_method,
+    ):
         """
         A dict-like interface to specific ticker information.
 
@@ -244,10 +266,16 @@ class TickersWithSpecificInfo(Tickers):
 
 
         """
-        assert specific_key in _ticker_attrs_that_are_properties or specific_key in _ticker_attrs_that_are_methods, \
-            f"Unrecognized specific_key. Needs to be one of these: " \
+        assert (
+            specific_key in _ticker_attrs_that_are_properties
+            or specific_key in _ticker_attrs_that_are_methods
+        ), (
+            f"Unrecognized specific_key. Needs to be one of these: "
             f"{_ticker_attrs_that_are_properties | _ticker_attrs_that_are_methods}"
-        super().__init__(ticker_symbols=ticker_symbols, **{specific_key: kwargs_for_specific_method})
+        )
+        super().__init__(
+            ticker_symbols=ticker_symbols, **{specific_key: kwargs_for_specific_method}
+        )
         self.specific_key = specific_key
         self.val_trans = val_trans
         self.kwargs_for_specific_method = kwargs_for_specific_method
@@ -263,19 +291,27 @@ class TickersWithSpecificInfo(Tickers):
         suffix = ""
         if self.kwargs_for_specific_method:
             suffix = f", {_nice_kv_string(self.kwargs_for_specific_method)}"
-        suffix = f", specific_key={self.specific_key}, val_trans={self.val_trans}" + suffix
+        suffix = (
+            f", specific_key={self.specific_key}, val_trans={self.val_trans}" + suffix
+        )
         if self._ticker_source_kind is not None:
-            return f"{type(self).__name__}" \
-                   f"(ticker_symbols=<{self._ticker_source_kind}>{suffix})"
+            return (
+                f"{type(self).__name__}"
+                f"(ticker_symbols=<{self._ticker_source_kind}>{suffix})"
+            )
         else:
-            return f"{type(self).__name__}" \
-                   f"(ticker_symbols={self.ticker_symbols}{suffix})"
+            return (
+                f"{type(self).__name__}"
+                f"(ticker_symbols={self.ticker_symbols}{suffix})"
+            )
 
     help_me_with = staticmethod(help_me_with)
 
 
 class BulkHistory(Tickers):
-    def __init__(self, ticker_symbols: Union[str, Iterable] = faang_tickers, **history_kwargs):
+    def __init__(
+        self, ticker_symbols: Union[str, Iterable] = faang_tickers, **history_kwargs
+    ):
         super().__init__(ticker_symbols=ticker_symbols, history=history_kwargs)
         self.yf_tickers = yf.Tickers(ticker_symbols)
         self.history_kwargs = history_kwargs
