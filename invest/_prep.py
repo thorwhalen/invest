@@ -1,3 +1,6 @@
+"""
+Data prep tools for invest.
+"""
 from inspect import signature, Parameter
 
 import invest.yfinance as yf

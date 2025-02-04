@@ -1,3 +1,7 @@
+"""
+Data access components for the invest package.
+"""
+
 import os
 
 from py2store import LocalPickleStore

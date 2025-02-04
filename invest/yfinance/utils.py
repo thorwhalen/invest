@@ -35,9 +35,17 @@ except ImportError:
 
 
 def empty_df(index=[]):
-    empty = _pd.DataFrame(index=index, data={
-        'Open': _np.nan, 'High': _np.nan, 'Low': _np.nan,
-        'Close': _np.nan, 'Adj Close': _np.nan, 'Volume': _np.nan})
+    empty = _pd.DataFrame(
+        index=index,
+        data={
+            'Open': _np.nan,
+            'High': _np.nan,
+            'Low': _np.nan,
+            'Close': _np.nan,
+            'Adj Close': _np.nan,
+            'Volume': _np.nan,
+        },
+    )
     empty.index.name = 'Date'
     return empty
 
@@ -50,15 +58,14 @@ def get_json(url, proxy=None):
         if "QuoteSummaryStore" not in html:
             return {}
 
-    json_str = html.split('root.App.main =')[1].split(
-        '(this)')[0].split(';\n}')[0].strip()
-    data = _json.loads(json_str)[
-        'context']['dispatcher']['stores']['QuoteSummaryStore']
+    json_str = (
+        html.split('root.App.main =')[1].split('(this)')[0].split(';\n}')[0].strip()
+    )
+    data = _json.loads(json_str)['context']['dispatcher']['stores']['QuoteSummaryStore']
 
     # return data
     new_data = _json.dumps(data).replace('{}', 'null')
-    new_data = _re.sub(
-        r'\{[\'|\"]raw[\'|\"]:(.*?),(.*?)\}', r'\1', new_data)
+    new_data = _re.sub(r'\{[\'|\"]raw[\'|\"]:(.*?),(.*?)\}', r'\1', new_data)
 
     return _json.loads(new_data)
 
@@ -74,21 +81,24 @@ def auto_adjust(data):
     df["Adj High"] = df["High"] / ratio
     df["Adj Low"] = df["Low"] / ratio
 
-    df.drop(
-        ["Open", "High", "Low", "Close"],
-        axis=1, inplace=True)
+    df.drop(["Open", "High", "Low", "Close"], axis=1, inplace=True)
 
-    df.rename(columns={
-        "Adj Open": "Open", "Adj High": "High",
-        "Adj Low": "Low", "Adj Close": "Close"
-    }, inplace=True)
+    df.rename(
+        columns={
+            "Adj Open": "Open",
+            "Adj High": "High",
+            "Adj Low": "Low",
+            "Adj Close": "Close",
+        },
+        inplace=True,
+    )
 
     df = df[["Open", "High", "Low", "Close", "Volume"]]
     return df[["Open", "High", "Low", "Close", "Volume"]]
 
 
 def back_adjust(data):
-    """ back-adjusted data to mimic true historical prices """
+    """back-adjusted data to mimic true historical prices"""
 
     df = data.copy()
     ratio = df["Adj Close"] / df["Close"]
@@ -96,14 +106,11 @@ def back_adjust(data):
     df["Adj High"] = df["High"] * ratio
     df["Adj Low"] = df["Low"] * ratio
 
-    df.drop(
-        ["Open", "High", "Low", "Adj Close"],
-        axis=1, inplace=True)
+    df.drop(["Open", "High", "Low", "Adj Close"], axis=1, inplace=True)
 
-    df.rename(columns={
-        "Adj Open": "Open", "Adj High": "High",
-        "Adj Low": "Low"
-    }, inplace=True)
+    df.rename(
+        columns={"Adj Open": "Open", "Adj High": "High", "Adj Low": "Low"}, inplace=True
+    )
 
     return df[["Open", "High", "Low", "Close", "Volume"]]
 
@@ -121,12 +128,16 @@ def parse_quotes(data, tz=None):
     if "adjclose" in data["indicators"]:
         adjclose = data["indicators"]["adjclose"][0]["adjclose"]
 
-    quotes = _pd.DataFrame({"Open": opens,
-                            "High": highs,
-                            "Low": lows,
-                            "Close": closes,
-                            "Adj Close": adjclose,
-                            "Volume": volumes})
+    quotes = _pd.DataFrame(
+        {
+            "Open": opens,
+            "High": highs,
+            "Low": lows,
+            "Close": closes,
+            "Adj Close": adjclose,
+            "Volume": volumes,
+        }
+    )
 
     quotes.index = _pd.to_datetime(timestamps, unit="s")
     quotes.sort_index(inplace=True)
@@ -143,8 +154,7 @@ def parse_actions(data, tz=None):
 
     if "events" in data:
         if "dividends" in data["events"]:
-            dividends = _pd.DataFrame(
-                data=list(data["events"]["dividends"].values()))
+            dividends = _pd.DataFrame(data=list(data["events"]["dividends"].values()))
             dividends.set_index("date", inplace=True)
             dividends.index = _pd.to_datetime(dividends.index, unit="s")
             dividends.sort_index(inplace=True)
@@ -154,15 +164,13 @@ def parse_actions(data, tz=None):
             dividends.columns = ["Dividends"]
 
         if "splits" in data["events"]:
-            splits = _pd.DataFrame(
-                data=list(data["events"]["splits"].values()))
+            splits = _pd.DataFrame(data=list(data["events"]["splits"].values()))
             splits.set_index("date", inplace=True)
             splits.index = _pd.to_datetime(splits.index, unit="s")
             splits.sort_index(inplace=True)
             if tz is not None:
                 splits.index = splits.index.tz_localize(tz)
-            splits["Stock Splits"] = splits["numerator"] / \
-                splits["denominator"]
+            splits["Stock Splits"] = splits["numerator"] / splits["denominator"]
             splits = splits["Stock Splits"]
 
     return dividends, splits
@@ -200,19 +208,20 @@ class ProgressBar:
     def update_iteration(self, val=None):
         val = val if val is not None else self.elapsed / float(self.iterations)
         self.__update_amount(val * 100.0)
-        self.prog_bar += '  %s of %s %s' % (
-            self.elapsed, self.iterations, self.text)
+        self.prog_bar += '  %s of %s %s' % (self.elapsed, self.iterations, self.text)
 
     def __update_amount(self, new_amount):
         percent_done = int(round((new_amount / 100.0) * 100.0))
         all_full = self.width - 2
         num_hashes = int(round((percent_done / 100.0) * all_full))
-        self.prog_bar = '[' + self.fill_char * \
-            num_hashes + ' ' * (all_full - num_hashes) + ']'
+        self.prog_bar = (
+            '[' + self.fill_char * num_hashes + ' ' * (all_full - num_hashes) + ']'
+        )
         pct_place = (len(self.prog_bar) // 2) - len(str(percent_done))
         pct_string = '%d%%' % percent_done
-        self.prog_bar = self.prog_bar[0:pct_place] + \
-            (pct_string + self.prog_bar[pct_place + len(pct_string):])
+        self.prog_bar = self.prog_bar[0:pct_place] + (
+            pct_string + self.prog_bar[pct_place + len(pct_string) :]
+        )
 
     def __str__(self):
         return str(self.prog_bar)

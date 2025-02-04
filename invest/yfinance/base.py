@@ -23,9 +23,10 @@ from __future__ import print_function
 
 import time as _time
 import datetime as _datetime
-import requests as _requests
 import pandas as _pd
 import numpy as _np
+
+from invest.util import requests_get
 
 try:
     from urllib.parse import quote as urlencode
@@ -41,7 +42,7 @@ from . import utils
 from . import shared
 
 
-class TickerBase():
+class TickerBase:
     def __init__(self, ticker):
         self.ticker = ticker.upper()
         self._history = None
@@ -60,23 +61,26 @@ class TickerBase():
         self._calendar = None
         self._expirations = {}
 
-        self._earnings = {
-            "yearly": utils.empty_df(),
-            "quarterly": utils.empty_df()}
-        self._financials = {
-            "yearly": utils.empty_df(),
-            "quarterly": utils.empty_df()}
-        self._balancesheet = {
-            "yearly": utils.empty_df(),
-            "quarterly": utils.empty_df()}
-        self._cashflow = {
-            "yearly": utils.empty_df(),
-            "quarterly": utils.empty_df()}
+        self._earnings = {"yearly": utils.empty_df(), "quarterly": utils.empty_df()}
+        self._financials = {"yearly": utils.empty_df(), "quarterly": utils.empty_df()}
+        self._balancesheet = {"yearly": utils.empty_df(), "quarterly": utils.empty_df()}
+        self._cashflow = {"yearly": utils.empty_df(), "quarterly": utils.empty_df()}
 
-    def history(self, period="1mo", interval="1d",
-                start=None, end=None, prepost=False, actions=True,
-                auto_adjust=True, back_adjust=False,
-                proxy=None, rounding=False, tz=None, **kwargs):
+    def history(
+        self,
+        period="1mo",
+        interval="1d",
+        start=None,
+        end=None,
+        prepost=False,
+        actions=True,
+        auto_adjust=True,
+        back_adjust=False,
+        proxy=None,
+        rounding=False,
+        tz=None,
+        **kwargs
+    ):
         """
         :Parameters:
             period : str
@@ -118,8 +122,7 @@ class TickerBase():
             elif isinstance(start, _datetime.datetime):
                 start = int(_time.mktime(start.timetuple()))
             else:
-                start = int(_time.mktime(
-                    _time.strptime(str(start), '%Y-%m-%d')))
+                start = int(_time.mktime(_time.strptime(str(start), '%Y-%m-%d')))
             if end is None:
                 end = int(_time.time())
             elif isinstance(end, _datetime.datetime):
@@ -148,11 +151,13 @@ class TickerBase():
 
         # Getting data from json
         url = "{}/v8/finance/chart/{}".format(self._base_url, self.ticker)
-        data = _requests.get(url=url, params=params, proxies=proxy)
+        data = requests_get(url=url, params=params, proxies=proxy)
         if "Will be right back" in data.text:
-            raise RuntimeError("*** YAHOO! FINANCE IS CURRENTLY DOWN! ***\n"
-                               "Our engineers are working quickly to resolve "
-                               "the issue. Thank you for your patience.")
+            raise RuntimeError(
+                "*** YAHOO! FINANCE IS CURRENTLY DOWN! ***\n"
+                "Our engineers are working quickly to resolve "
+                "the issue. Thank you for your patience."
+            )
         data = data.json()
 
         # Work with errors
@@ -169,8 +174,11 @@ class TickerBase():
                 print('- %s: %s' % (self.ticker, err_msg))
             return shared._DFS[self.ticker]
 
-        elif "chart" not in data or data["chart"]["result"] is None or \
-                not data["chart"]["result"]:
+        elif (
+            "chart" not in data
+            or data["chart"]["result"] is None
+            or not data["chart"]["result"]
+        ):
             shared._DFS[self.ticker] = utils.empty_df()
             shared._ERRORS[self.ticker] = err_msg
             if "many" not in kwargs and debug_mode:
@@ -190,14 +198,17 @@ class TickerBase():
         # 2) fix weired bug with Yahoo! - returning 60m for 30m bars
         if interval.lower() == "30m":
             quotes2 = quotes.resample('30T')
-            quotes = _pd.DataFrame(index=quotes2.last().index, data={
-                'Open': quotes2['Open'].first(),
-                'High': quotes2['High'].max(),
-                'Low': quotes2['Low'].min(),
-                'Close': quotes2['Close'].last(),
-                'Adj Close': quotes2['Adj Close'].last(),
-                'Volume': quotes2['Volume'].sum()
-            })
+            quotes = _pd.DataFrame(
+                index=quotes2.last().index,
+                data={
+                    'Open': quotes2['Open'].first(),
+                    'High': quotes2['High'].max(),
+                    'Low': quotes2['Low'].min(),
+                    'Close': quotes2['Close'].last(),
+                    'Adj Close': quotes2['Adj Close'].last(),
+                    'Volume': quotes2['Volume'].sum(),
+                },
+            )
             try:
                 quotes['Dividends'] = quotes2['Dividends'].max()
             except Exception:
@@ -213,8 +224,7 @@ class TickerBase():
             quotes = utils.back_adjust(quotes)
 
         if rounding:
-            quotes = _np.round(quotes, data[
-                "chart"]["result"][0]["meta"]["priceHint"])
+            quotes = _np.round(quotes, data["chart"]["result"][0]["meta"]["priceHint"])
         quotes['Volume'] = quotes['Volume'].fillna(0).astype(_np.int64)
 
         quotes.dropna(inplace=True)
@@ -224,12 +234,14 @@ class TickerBase():
 
         # combine
         df = _pd.concat([quotes, dividends, splits], axis=1, sort=True)
-        df["Dividends"].fillna(0, inplace=True)
-        df["Stock Splits"].fillna(0, inplace=True)
+        df["Dividends"] = _pd.to_numeric(df["Dividends"], errors='coerce').fillna(0)
+        df["Stock Splits"] = _pd.to_numeric(df["Stock Splits"], errors='coerce').fillna(0)
 
         # index eod/intraday
+        df.index = _pd.to_datetime(df.index)
         df.index = df.index.tz_localize("UTC").tz_convert(
-            data["chart"]["result"][0]["meta"]["exchangeTimezoneName"])
+            data["chart"]["result"][0]["meta"]["exchangeTimezoneName"]
+        )
 
         if params["interval"][-1] == "m":
             df.index.name = "Datetime"
@@ -252,8 +264,7 @@ class TickerBase():
         def cleanup(data):
             df = _pd.DataFrame(data).drop(columns=['maxAge'])
             for col in df.columns:
-                df[col] = _np.where(
-                    df[col].astype(str) == '-', _np.nan, df[col])
+                df[col] = _np.where(df[col].astype(str) == '-', _np.nan, df[col])
 
             df.set_index('endDate', inplace=True)
             try:
@@ -282,36 +293,44 @@ class TickerBase():
         data = utils.get_json(ticker_url, proxy)
 
         # holders
-        holders = _pd.read_html(ticker_url+'/holders')
+        holders = _pd.read_html(ticker_url + '/holders')
 
-        if len(holders)>=3:
+        if len(holders) >= 3:
             self._major_holders = holders[0]
             self._institutional_holders = holders[1]
             self._mutualfund_holders = holders[2]
-        elif len(holders)>=2:
+        elif len(holders) >= 2:
             self._major_holders = holders[0]
             self._institutional_holders = holders[1]
         else:
             self._major_holders = holders[0]
 
-        #self._major_holders = holders[0]
-        #self._institutional_holders = holders[1]
+        # self._major_holders = holders[0]
+        # self._institutional_holders = holders[1]
 
         if self._institutional_holders is not None:
             if 'Date Reported' in self._institutional_holders:
                 self._institutional_holders['Date Reported'] = _pd.to_datetime(
-                self._institutional_holders['Date Reported'])
+                    self._institutional_holders['Date Reported']
+                )
             if '% Out' in self._institutional_holders:
-                self._institutional_holders['% Out'] = self._institutional_holders[
-                '% Out'].str.replace('%', '').astype(float)/100
+                self._institutional_holders['% Out'] = (
+                    self._institutional_holders['% Out']
+                    .str.replace('%', '')
+                    .astype(float)
+                    / 100
+                )
 
         if self._mutualfund_holders is not None:
             if 'Date Reported' in self._mutualfund_holders:
                 self._mutualfund_holders['Date Reported'] = _pd.to_datetime(
-                self._mutualfund_holders['Date Reported'])
+                    self._mutualfund_holders['Date Reported']
+                )
             if '% Out' in self._mutualfund_holders:
-                self._mutualfund_holders['% Out'] = self._mutualfund_holders[
-                '% Out'].str.replace('%', '').astype(float)/100
+                self._mutualfund_holders['% Out'] = (
+                    self._mutualfund_holders['% Out'].str.replace('%', '').astype(float)
+                    / 100
+                )
 
         # sustainability
         d = {}
@@ -324,15 +343,23 @@ class TickerBase():
             s.columns = ['Value']
             s.index.name = '%.f-%.f' % (
                 s[s.index == 'ratingYear']['Value'].values[0],
-                s[s.index == 'ratingMonth']['Value'].values[0])
+                s[s.index == 'ratingMonth']['Value'].values[0],
+            )
 
-            self._sustainability = s[~s.index.isin(
-                ['maxAge', 'ratingYear', 'ratingMonth'])]
+            self._sustainability = s[
+                ~s.index.isin(['maxAge', 'ratingYear', 'ratingMonth'])
+            ]
 
         # info (be nice to python 2)
         self._info = {}
-        items = ['summaryProfile', 'summaryDetail', 'quoteType',
-                 'defaultKeyStatistics', 'assetProfile', 'summaryDetail']
+        items = [
+            'summaryProfile',
+            'summaryDetail',
+            'quoteType',
+            'defaultKeyStatistics',
+            'assetProfile',
+            'summaryDetail',
+        ]
         for item in items:
             if isinstance(data.get(item), dict):
                 self._info.update(data[item])
@@ -340,18 +367,17 @@ class TickerBase():
         self._info['regularMarketPrice'] = self._info['regularMarketOpen']
         self._info['logo_url'] = ""
         try:
-            domain = self._info['website'].split(
-                '://')[1].split('/')[0].replace('www.', '')
+            domain = (
+                self._info['website'].split('://')[1].split('/')[0].replace('www.', '')
+            )
             self._info['logo_url'] = 'https://logo.clearbit.com/%s' % domain
         except Exception:
             pass
 
         # events
         try:
-            cal = _pd.DataFrame(
-                data['calendarEvents']['earnings'])
-            cal['earningsDate'] = _pd.to_datetime(
-                cal['earningsDate'], unit='s')
+            cal = _pd.DataFrame(data['calendarEvents']['earnings'])
+            cal['earningsDate'] = _pd.to_datetime(cal['earningsDate'], unit='s')
             self._calendar = cal.T
             self._calendar.index = utils.camel2title(self._calendar.index)
             self._calendar.columns = ['Value']
@@ -360,33 +386,32 @@ class TickerBase():
 
         # analyst recommendations
         try:
-            rec = _pd.DataFrame(
-                data['upgradeDowngradeHistory']['history'])
-            rec['earningsDate'] = _pd.to_datetime(
-                rec['epochGradeDate'], unit='s')
+            rec = _pd.DataFrame(data['upgradeDowngradeHistory']['history'])
+            rec['earningsDate'] = _pd.to_datetime(rec['epochGradeDate'], unit='s')
             rec.set_index('earningsDate', inplace=True)
             rec.index.name = 'Date'
             rec.columns = utils.camel2title(rec.columns)
-            self._recommendations = rec[[
-                'Firm', 'To Grade', 'From Grade', 'Action']].sort_index()
+            self._recommendations = rec[
+                ['Firm', 'To Grade', 'From Grade', 'Action']
+            ].sort_index()
         except Exception:
             pass
 
         # get fundamentals
-        data = utils.get_json(ticker_url+'/financials', proxy)
+        data = utils.get_json(ticker_url + '/financials', proxy)
 
         # generic patterns
         for key in (
             (self._cashflow, 'cashflowStatement', 'cashflowStatements'),
             (self._balancesheet, 'balanceSheet', 'balanceSheetStatements'),
-            (self._financials, 'incomeStatement', 'incomeStatementHistory')
+            (self._financials, 'incomeStatement', 'incomeStatementHistory'),
         ):
 
             item = key[1] + 'History'
             if isinstance(data.get(item), dict):
                 key[0]['yearly'] = cleanup(data[item][key[2]])
 
-            item = key[1]+'HistoryQuarterly'
+            item = key[1] + 'HistoryQuarterly'
             if isinstance(data.get(item), dict):
                 key[0]['quarterly'] = cleanup(data[item][key[2]])
 
@@ -527,10 +552,11 @@ class TickerBase():
         if "shortName" in self._info:
             q = self._info['shortName']
 
-        url = 'https://markets.businessinsider.com/ajax/' \
-              'SearchController_Suggest?max_results=25&query=%s' \
-            % urlencode(q)
-        data = _requests.get(url=url, proxies=proxy).text
+        url = (
+            'https://markets.businessinsider.com/ajax/'
+            'SearchController_Suggest?max_results=25&query=%s' % urlencode(q)
+        )
+        data = requests_get(url=url, proxies=proxy).text
 
         search_str = '"{}|'.format(ticker)
         if search_str not in data:

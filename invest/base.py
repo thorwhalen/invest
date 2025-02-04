@@ -1,3 +1,7 @@
+"""
+Base functionality for the invest package.
+"""
+
 from inspect import signature
 from importlib_resources import files
 from functools import lru_cache, cached_property

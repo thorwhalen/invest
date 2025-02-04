@@ -1,14 +1,28 @@
+"""
+util.py for invest package
+"""
+
 import os
 from typing import Iterable
 from datetime import datetime
 
+import requests as _requests
+
 DFLT_TICKER = "GOOG"
 DFLT_DATE_FORMAT = '%Y-%m-%d:%H:%M:%S'
+
+DFLT_REQUEST_HEADER = {'User-Agent': 'invest/1.0'}
+
+
+def requests_get(*args, header=DFLT_REQUEST_HEADER, **kwargs):
+    return _requests.get(*args, headers=header, **kwargs)
 
 
 def hms_message(msg=''):
     t = datetime.now()
-    return "({:02.0f}){:02.0f}:{:02.0f}:{:02.0f} - {}".format(t.day, t.hour, t.minute, t.second, msg)
+    return "({:02.0f}){:02.0f}:{:02.0f}:{:02.0f} - {}".format(
+        t.day, t.hour, t.minute, t.second, msg
+    )
 
 
 def print_progress(msg, refresh=None, display_time=True):
@@ -53,7 +67,9 @@ def _assert_that_attrs_extraction_is_correct():
     )
     from invest._prep import _getless_callable_attrs
 
-    assert _getless_callable_attrs.issubset(_ticker_attrs_that_are_properties), "Some callable attrs were lost"
+    assert _getless_callable_attrs.issubset(
+        _ticker_attrs_that_are_properties
+    ), "Some callable attrs were lost"
     ticker = Ticker(DFLT_TICKER)
     for attr in _getless_callable_attrs:
         prop_version = ticker[attr]
@@ -123,6 +139,7 @@ def is_bsonizable(obj):
 
     """
     from bson import json_util
+
     try:
         json_util.loads(json_util.dumps(obj))
         return True
