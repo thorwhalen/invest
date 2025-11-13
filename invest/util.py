@@ -4,7 +4,7 @@ util.py for invest package
 
 import io
 import os
-from typing import Iterable
+from collections.abc import Iterable
 from datetime import datetime
 
 import requests as _requests
@@ -135,7 +135,7 @@ def is_jsonizable(obj):
         return False
 
 
-from typing import Iterable
+from collections.abc import Iterable
 
 
 def is_bsonizable(obj):

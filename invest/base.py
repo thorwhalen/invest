@@ -5,7 +5,8 @@ Base functionality for the invest package.
 from inspect import signature
 from importlib.resources import files
 from functools import lru_cache, cached_property
-from typing import Iterable, Optional, Callable, Union
+from typing import Optional, Union
+from collections.abc import Iterable, Callable
 import os
 
 from dol import KvReader, add_ipython_key_completions
@@ -105,7 +106,7 @@ class Tickers(KvReader):
 
     def __init__(
         self,
-        ticker_symbols: Union[str, Iterable] = 'local_list',
+        ticker_symbols: str | Iterable = 'local_list',
         **kwargs_for_method_keys,
     ):
         """
@@ -241,7 +242,7 @@ class TickersWithSpecificInfo(Tickers):
         self,
         ticker_symbols='local_list',
         specific_key: str = 'info',
-        val_trans: Optional[Callable] = None,
+        val_trans: Callable | None = None,
         **kwargs_for_specific_method,
     ):
         """
@@ -310,7 +311,7 @@ class TickersWithSpecificInfo(Tickers):
 
 class BulkHistory(Tickers):
     def __init__(
-        self, ticker_symbols: Union[str, Iterable] = faang_tickers, **history_kwargs
+        self, ticker_symbols: str | Iterable = faang_tickers, **history_kwargs
     ):
         super().__init__(ticker_symbols=ticker_symbols, history=history_kwargs)
         self.yf_tickers = yf.Tickers(ticker_symbols)

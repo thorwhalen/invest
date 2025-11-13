@@ -139,7 +139,7 @@ class DbDf(MongoDbReader):
 def file_to_field_groups(file=proj_file('misc', 'field_groups_01.xlsx')):
     picks_df = pd.read_excel(file)
 
-    p = re.compile('[\w\s:]+')
+    p = re.compile(r'[\w\s:]+')
 
     def triples(jerome):
         for x in picks_df.iloc[:, 1].dropna().values:

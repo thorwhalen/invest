@@ -19,13 +19,13 @@ from i2.deco import postprocess
 from invest.misc.yf_prep import DbDf
 
 qy_parser = StrTupleDict('{quarter}Q{year}',
-                         {'quarter': '\d', 'year': '\d\d\d\d'},
+                         {'quarter': r'\d', 'year': r'\d\d\d\d'},
                          process_info_dict={'quarter': int, 'year': int}
                          )
 
 month_of_quarter = {1: 1, 2: 4, 3: 7, 4: 10}
 
-not_w_p = re.compile('\W')
+not_w_p = re.compile(r'\W')
 
 
 def normalize_str(string):

@@ -71,7 +71,7 @@ _YahooData = mk_sourced_store(
 )
 
 
-def join_tuples_with_sep(k: Union[str, Tuple[str]]) -> str:
+def join_tuples_with_sep(k: str | tuple[str]) -> str:
     if isinstance(k, tuple):
         return path_sep.join(k)
     return k
