@@ -76,8 +76,8 @@ converter_for_data_kind = {
     'earnings': convert_df_as_dict_list_with_index
 }
 
-key_wrap = wrap_kvs(key_of_id=lambda x: tuple(x.split('/')),
-                    id_of_key='/'.join)
+key_wrap = wrap_kvs(key_decoder=lambda x: tuple(x.split('/')),
+                    key_encoder='/'.join)
 
 
 @key_wrap
@@ -130,7 +130,7 @@ yf = MongoDbReader('yf', mk_collection_store=MongoCollectionPersister)
 
 
 @mk_cached_store
-@wrap_kvs(obj_of_data=mgc_to_df)
+@wrap_kvs(value_decoder=mgc_to_df)
 class DbDf(MongoDbReader):
     def __init__(self):
         super().__init__('yf', mk_collection_store=MongoCollectionPersister)
