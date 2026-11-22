@@ -113,7 +113,13 @@ def copy_local_to_mongo():
 
 
 def mgc_to_df(mgc):
-    return pd.DataFrame([dict(ticker=k['_id'], **v) for k, v in mgc.items()]).set_index('ticker')
+    # Drop _id from values: mongodol>=0.1.13 keeps key fields in items() values.
+    return pd.DataFrame(
+        [
+            dict(ticker=k['_id'], **{f: x for f, x in v.items() if f != '_id'})
+            for k, v in mgc.items()
+        ]
+    ).set_index('ticker')
 
 
 def mgc_to_prepped_data(mgc):
