@@ -1,9 +1,10 @@
 # invest
 
-Python access to structure stock market information
+Python access to structured stock market information: ticker info, historical prices and bulk histories, from simple calls.
 
-
-To install:	```pip install invest```
+```bash
+pip install invest
+```
 
 - [invest](#invest)
 - [Quick Start](#quick-start)
@@ -455,6 +456,7 @@ df
 
 
 
+<!-- wads-docs: skip needs live market data or the optional mplfinance extra -->
 ```python
 from mplfinance import plot as candlestick_plot  # pip install mplfinance if you don't have it already
 
@@ -475,13 +477,13 @@ See the next _Configuring Ticker objects_ section on how to do that.
 
 ## ticker_symbols argument
 
-The first argument of `Tickers` is the `ticker_symbols` argument. 
+The first argument of `Tickers` is the `ticker_symbols` argument.
 
 One can specify a collection (list, set, tuple, etc.) of ticker symbol strings, or a path to a file containing a pickle of such a collection.
 
-The default is the string `'local_list'` which has the effect of using a default list (currently of about 4000 tickers), but it's contents can change in the future. 
+The default is the string `'local_list'` which has the effect of using a default list (currently of about 4000 tickers), but it's contents can change in the future.
 
-Note that this `ticker_symbols` will have an effect on such affairs as `list(tickers)`, `len(tickers)`, or `s in tickers`, when it's relevant to use these. 
+Note that this `ticker_symbols` will have an effect on such affairs as `list(tickers)`, `len(tickers)`, or `s in tickers`, when it's relevant to use these.
 
 But any `Tickers` object will allow access to any ticker symbol, regardless if it's in the `ticker_symbols` collection or not.
 
@@ -504,7 +506,7 @@ assert tickers['NFLX']['info']['shortName'] == 'Netflix, Inc.'
 ## Notes
 
 - Both `Tickers` and `Ticker` instances have tab-triggered auto-suggestion enabled when you get an item. Example: `tickers['AA<now press the TAB button...>`.
-- The specification of 
+- The specification of
 
 
 ```python
@@ -515,7 +517,7 @@ assert tickers['NFLX']['info']['shortName'] == 'Netflix, Inc.'
 
 ## Configure a Ticker instance
 
-You can instantiate a `Ticker` instance directly, from **any valid ticker symbol**. The `Tickers` class is just a way to make a collection of tickers to work with. 
+You can instantiate a `Ticker` instance directly, from **any valid ticker symbol**. The `Tickers` class is just a way to make a collection of tickers to work with.
 
 
 ```python
@@ -532,7 +534,7 @@ ticker
 
 
 
-But you'll notice that `Ticker` (and `Tickers`) have more than one argument. 
+But you'll notice that `Ticker` (and `Tickers`) have more than one argument.
 
 
 ```python
@@ -547,11 +549,11 @@ print(signature(Ticker))
 
 What's this `kwargs_for_method_keys`?
 
-Well, at the time of writing this, `Ticker` object is just a convenient dict-like interface to the attributes of the `Ticker` of the `yfinance` package which is itself a convenient python interface to the yahoo finance API. 
+Well, at the time of writing this, `Ticker` object is just a convenient dict-like interface to the attributes of the `Ticker` of the `yfinance` package which is itself a convenient python interface to the yahoo finance API.
 
-When you do `list(ticker)`, you're just getting a list of attributes of `yfinance.Ticker`: Both properties and methods that don't require any arguments. Though these methods don't require any arguments -- meaning all their arguments have defaults -- you can still specify if you want to use different defaults. 
+When you do `list(ticker)`, you're just getting a list of attributes of `yfinance.Ticker`: Both properties and methods that don't require any arguments. Though these methods don't require any arguments -- meaning all their arguments have defaults -- you can still specify if you want to use different defaults.
 
-That's where `kwargs_for_method_keys` comes in. It specifies what `arg=val` pairs that should be used for particular methods of `yfinance.Ticker`. 
+That's where `kwargs_for_method_keys` comes in. It specifies what `arg=val` pairs that should be used for particular methods of `yfinance.Ticker`.
 
 If you want to know more about what you can do with the `Ticker` object, you might want to check out `yfinance`'s and yahoo finance API's documentation.
 
@@ -604,7 +606,7 @@ Ticker.help_me_with('history')
 
 ## Example
 
-Here's you can get `history` to give you something different. 
+Here's you can get `history` to give you something different.
 
 Say, get data for the last day, with a granularity of 15 minutes.
 
@@ -814,6 +816,7 @@ df
 
 
 
+<!-- wads-docs: skip needs live market data or the optional mplfinance extra -->
 ```python
 from mplfinance import plot as candlestick_plot  # pip install mplfinance if you don't have it already
 
@@ -859,6 +862,7 @@ tickers['NFLX']
 
 
 
+<!-- wads-docs: skip needs live market data or the optional mplfinance extra -->
 ```python
 from mplfinance import plot as candlestick_plot  # pip install mplfinance if you don't have it already
 
@@ -872,6 +876,7 @@ candlestick_plot(tickers['NFLX']['history'])
 
 
 
+<!-- wads-docs: skip needs live market data or the optional mplfinance extra -->
 ```python
 candlestick_plot(tickers['AMZN']['history'])
 ```
@@ -882,11 +887,12 @@ candlestick_plot(tickers['AMZN']['history'])
     
 
 
-So Netflix and Amazon did well. 
+So Netflix and Amazon did well.
 
 Delta, less so:
 
 
+<!-- wads-docs: skip needs live market data or the optional mplfinance extra -->
 ```python
 candlestick_plot(tickers['DAL']['history'])
 ```
@@ -899,11 +905,9 @@ candlestick_plot(tickers['DAL']['history'])
 
 # Getting (only) specific information about tickers
 
-`Tickers` and `Ticker` are convenient if you want to analyze several aspects of a ticker since you can poke around the various keys (e.g. `info`, `history`, etc.). 
+`Tickers` and `Ticker` are convenient if you want to analyze several aspects of a ticker since you can poke around the various keys (e.g. `info`, `history`, etc.).
 
-But if a particular analysis only needs one of these, it's more convenient to use `TickersWithSpecificInfo`, 
-which gives you the same interface as `Tickers` (in fact, it's a subclass if `Tickers`), 
-but fixes the key.
+But if a particular analysis only needs one of these, it's more convenient to use `TickersWithSpecificInfo`, which gives you the same interface as `Tickers` (in fact, it's a subclass if `Tickers`), but fixes the key.
 
 ## Example: Historical data
 
@@ -925,6 +929,7 @@ tickers
 
 
 
+<!-- wads-docs: skip needs live market data or the optional mplfinance extra -->
 ```python
 candlestick_plot(tickers['GOOG'])
 ```
@@ -936,6 +941,7 @@ candlestick_plot(tickers['GOOG'])
 
 
 
+<!-- wads-docs: skip needs live market data or the optional mplfinance extra -->
 ```python
 candlestick_plot(tickers['NFLX'])
 ```
@@ -947,6 +953,7 @@ candlestick_plot(tickers['NFLX'])
 
 
 
+<!-- wads-docs: skip needs live market data or the optional mplfinance extra -->
 ```python
 candlestick_plot(tickers['AMZN'])
 ```
@@ -958,6 +965,7 @@ candlestick_plot(tickers['AMZN'])
 
 
 
+<!-- wads-docs: skip needs live market data or the optional mplfinance extra -->
 ```python
 candlestick_plot(tickers['AAPL'])
 ```
@@ -1019,6 +1027,7 @@ tickers
 
 
 
+<!-- wads-docs: skip needs live market data or the optional mplfinance extra -->
 ```python
 info_df = pd.DataFrame(list(tickers.values()))
 info_df
@@ -1097,6 +1106,7 @@ tickers
 
 
 
+<!-- wads-docs: skip needs live market data or the optional mplfinance extra -->
 ```python
 candlestick_plot(tickers['FB'])
 ```
@@ -1113,6 +1123,7 @@ candlestick_plot(tickers['FB'])
 Notice that the data doesn't download again when we ask for `GOOG` data. That's because the first download bulk downloaded the data for our whole list of ticker symbols.
 
 
+<!-- wads-docs: skip needs live market data or the optional mplfinance extra -->
 ```python
 candlestick_plot(tickers['GOOG'])
 ```
@@ -1125,11 +1136,7 @@ candlestick_plot(tickers['GOOG'])
 
 ## Notes
 
-- - Though `Tickers` allows you to deal with a collection of tickers, it does so (for time being) by calling 
-yahoo's API for each individual ticker. 
-The API does, on the other hand, contain some bulk tickers routes which we intend to integrate. 
-For historical data (`history`), we have `BulkHistory` that uses the bulk API (through `yfinance.Tickers`), 
-but for other information (such at the `info` key), we don't (yet).
+- - Though `Tickers` allows you to deal with a collection of tickers, it does so (for time being) by calling yahoo's API for each individual ticker. The API does, on the other hand, contain some bulk tickers routes which we intend to integrate. For historical data (`history`), we have `BulkHistory` that uses the bulk API (through `yfinance.Tickers`), but for other information (such at the `info` key), we don't (yet).
 
 
 # All information
@@ -1137,6 +1144,7 @@ but for other information (such at the `info` key), we don't (yet).
 Some utils to get all data on a single ticker.
 
 
+<!-- wads-docs: skip needs live market data or the optional mplfinance extra -->
 ```python
 from invest import Ticker
 from invest import all_info, all_info_printable_string
@@ -1168,6 +1176,7 @@ list(d)  # list of keys (data names) we have data (values) for, for the given ti
 
 
 
+<!-- wads-docs: skip needs live market data or the optional mplfinance extra -->
 ```python
 print(f"The following data is for ticker: {ticker.ticker_symbol}\n\n")
 print(all_info_printable_string(ticker))
